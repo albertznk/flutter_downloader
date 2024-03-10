@@ -842,7 +842,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         const val ARG_SAVE_IN_PUBLIC_STORAGE = "save_in_public_storage"
         const val ARG_IGNORESSL = "ignoreSsl"
         private val TAG = DownloadWorker::class.java.simpleName
-        private const val BUFFER_SIZE = 4096
+        private const val BUFFER_SIZE = 8096
         private const val CHANNEL_ID = "FLUTTER_DOWNLOADER_NOTIFICATION"
         private val isolateStarted = AtomicBoolean(false)
         private val isolateQueue = ArrayDeque<List<Any>>()
