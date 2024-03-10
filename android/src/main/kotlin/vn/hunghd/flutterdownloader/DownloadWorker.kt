@@ -692,7 +692,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             // If this is progress update, it's not much important if it is dropped because there're still incoming updates later
             // If this is the final update, it must be success otherwise the notification will be stuck at the processing state
             // In order to ensure the final one is success, we check and sleep a second if need.
-            if (System.currentTimeMillis() - lastCallUpdateNotification < 300) {
+            if (System.currentTimeMillis() - lastCallUpdateNotification < 3000) {
                 if (finalize) {
                     log("Update too frequently!!!!, but it is the final update, we should sleep a second to ensure the update call can be processed")
                     try {
