@@ -156,7 +156,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val headers: String = inputData.getString(ARG_HEADERS)
             ?: throw IllegalArgumentException("Argument '$ARG_HEADERS' should not be null")
         var isResume: Boolean = inputData.getBoolean(ARG_IS_RESUME, false)
-        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 150000)
+        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 450000)
         debug = inputData.getBoolean(ARG_DEBUG, false)
         step = inputData.getInt(ARG_STEP, 10)
         ignoreSsl = inputData.getBoolean(ARG_IGNORESSL, false)
@@ -691,11 +691,11 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             // If this is progress update, it's not much important if it is dropped because there're still incoming updates later
             // If this is the final update, it must be success otherwise the notification will be stuck at the processing state
             // In order to ensure the final one is success, we check and sleep a second if need.
-            if (System.currentTimeMillis() - lastCallUpdateNotification < 1000) {
+            if (System.currentTimeMillis() - lastCallUpdateNotification < 300) {
                 if (finalize) {
                     log("Update too frequently!!!!, but it is the final update, we should sleep a second to ensure the update call can be processed")
                     try {
-                        Thread.sleep(1000)
+                        Thread.sleep(300)
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
