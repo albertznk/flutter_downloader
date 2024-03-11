@@ -139,8 +139,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val filename: String? = inputData.getString(ARG_FILE_NAME)
         val task = taskDao?.loadTask(id.toString())
         if (task != null && task.status == DownloadStatus.ENQUEUED) {
-            updateNotification(context, filename ?: url, DownloadStatus.CANCELED, -1, null, true)
-            taskDao?.updateTask(id.toString(), DownloadStatus.CANCELED, lastProgress)
+            updateNotification(context, filename ?: url, DownloadStatus.FAILED, -1, null, true)
+            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
         }
     }
 
@@ -175,8 +175,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                         )
         )
 
-        // Task has been deleted or cancelled
-        if (task == null || task.status == DownloadStatus.CANCELED) {
+        // Task has been deleted or cancelled  //|| task.status == DownloadStatus.CANCELED
+        if (task == null ) {
             return Result.success()
         }
         showNotification = inputData.getBoolean(ARG_SHOW_NOTIFICATION, false)
@@ -425,7 +425,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                 val loadedTask = taskDao?.loadTask(id.toString())
                 val progress = if (isStopped && loadedTask!!.resumable) lastProgress else 100
                 val status =
-                        if (isStopped) if (loadedTask!!.resumable) DownloadStatus.PAUSED else DownloadStatus.CANCELED else DownloadStatus.COMPLETE
+                        if (isStopped) if (loadedTask!!.resumable) DownloadStatus.PAUSED else DownloadStatus.FAILED else DownloadStatus.COMPLETE
                 val storage: Int = ContextCompat.checkSelfPermission(
                         applicationContext,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -465,7 +465,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             } else {
                 val loadedTask = taskDao!!.loadTask(id.toString())
                 val status =
-                        if (isStopped) if (loadedTask!!.resumable) DownloadStatus.PAUSED else DownloadStatus.CANCELED else DownloadStatus.FAILED
+                        if (isStopped) if (loadedTask!!.resumable) DownloadStatus.PAUSED else DownloadStatus.FAILED
                 taskDao!!.updateTask(id.toString(), status, lastProgress)
                 updateNotification(context, actualFilename ?: fileURL, status, -1, null, true)
                 log(if (isStopped) "Download canceled" else "Server replied HTTP code: $responseCode")
@@ -656,7 +656,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                 }
 
                 DownloadStatus.CANCELED -> {
-                    builder.setContentText(msgCanceled).setProgress(0, 0, false)
+                    builder.setContentText(msgFailed).setProgress(0, 0, false)
                     builder.setOngoing(false)
                             .setSmallIcon(android.R.drawable.stat_sys_download_done)
                 }
