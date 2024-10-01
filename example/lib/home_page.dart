@@ -2,13 +2,13 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_downloader_example/data.dart';
 import 'package:flutter_downloader_example/download_list_item.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+// import 'package:permission_handler/permission_handler.dart';
 
 class MyHomePage extends StatefulWidget with WidgetsBindingObserver {
   const MyHomePage({super.key, required this.title, required this.platform});
@@ -258,20 +258,20 @@ class _MyHomePageState extends State<MyHomePage> {
       return true;
     }
 
-    if (Platform.isAndroid) {
-      final info = await DeviceInfoPlugin().androidInfo;
-      if (info.version.sdkInt > 28) {
-        return true;
-      }
-
-      final status = await Permission.storage.status;
-      if (status == PermissionStatus.granted) {
-        return true;
-      }
-
-      final result = await Permission.storage.request();
-      return result == PermissionStatus.granted;
-    }
+    // if (Platform.isAndroid) {
+    //   final info = await DeviceInfoPlugin().androidInfo;
+    //   if (info.version.sdkInt > 28) {
+    //     return true;
+    //   }
+    //
+    //   final status = await Permission.storage.status;
+    //   if (status == PermissionStatus.granted) {
+    //     return true;
+    //   }
+    //
+    //   final result = await Permission.storage.request();
+    //   return result == PermissionStatus.granted;
+    // }
 
     throw StateError('unknown platform');
   }
