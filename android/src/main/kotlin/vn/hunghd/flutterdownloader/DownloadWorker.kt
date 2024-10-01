@@ -307,8 +307,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                     }
                 }
                 log("Open connection to $url")
-                httpConn.connectTimeout = timeout
-                httpConn.readTimeout = timeout
+                httpConn.connectTimeout = 60000
+                httpConn.readTimeout = 60000
                 httpConn.instanceFollowRedirects = false // Make the logic below easier to detect redirections
                 httpConn.setRequestProperty("User-Agent", "Mozilla/5.0...")
 
