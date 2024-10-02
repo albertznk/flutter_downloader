@@ -270,7 +270,7 @@ class FlutterDownloader {
   static Future<String?> resume({
     required String taskId,
     bool requiresStorageNotLow = true,
-    int timeout = 15000,
+    int timeout = 600000,
   }) async {
     assert(_initialized, 'plugin flutter_downloader is not initialized');
 
