@@ -213,7 +213,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             e.printStackTrace()
             dbHelper = null
             taskDao = null
-            Result.failure()
+            Result.retry()
         }
     }
 
