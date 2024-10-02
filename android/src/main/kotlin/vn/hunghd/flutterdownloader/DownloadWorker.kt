@@ -295,7 +295,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                     } else {
                         times = visited[url]!! + 1
                     }
-                    if (times > 5) throw IOException("Stuck in redirect loop")
+                    if (times > 15) throw IOException("Stuck in redirect loop")
                     resourceUrl = URL(url)
                     httpConn = if (ignoreSsl) {
                         trustAllHosts()
@@ -356,13 +356,13 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
 
             } catch (e: IOException) {
                 logError("Download attempt $attempt failed with error: ${e.message}")
-                if (attempt >= maxRetries - 1) {
-                    taskDao!!.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
-                    updateNotification(context, actualFilename ?: fileURL, DownloadStatus.FAILED, -1, null, true)
-                } else {
-                    log("Retrying download in $retryDelay ms...")
+      //          if (attempt >= maxRetries - 1) {
+//                    taskDao!!.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
+//                    updateNotification(context, actualFilename ?: fileURL, DownloadStatus.FAILED, -1, null, true)
+  //              } else {
+//                    log("Retrying download in $retryDelay ms...")
                     Thread.sleep(retryDelay) // Backoff before retrying
-                }
+    //            }
             } finally {
                 try {
                     outputStream?.flush()
