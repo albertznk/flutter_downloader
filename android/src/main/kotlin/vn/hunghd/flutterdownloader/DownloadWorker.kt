@@ -156,7 +156,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val headers: String = inputData.getString(ARG_HEADERS)
                 ?: throw IllegalArgumentException("Argument '$ARG_HEADERS' should not be null")
         var isResume: Boolean = inputData.getBoolean(ARG_IS_RESUME, false)
-        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 45000)
+        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 600000)
         debug = inputData.getBoolean(ARG_DEBUG, false)
         step = inputData.getInt(ARG_STEP, 10)
         ignoreSsl = inputData.getBoolean(ARG_IGNORESSL, false)
@@ -259,8 +259,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             headers: String,
             isResume: Boolean,
             timeout: Int,
-            maxRetries: Int = 3, // Add a max retries parameter
-            retryDelay: Long = 2000 // Add a delay between retries (in milliseconds)
+            maxRetries: Int = 15, // Add a max retries parameter
+            retryDelay: Long =1000 // Add a delay between retries (in milliseconds)
     ) {
         var actualFilename = filename
         var url = fileURL
@@ -314,8 +314,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                         }
                     }
                     log("Open connection to $url")
-                    httpConn.connectTimeout = 60000
-                    httpConn.readTimeout = 60000
+                    httpConn.connectTimeout = 600000
+                    httpConn.readTimeout = 600000
                     httpConn.instanceFollowRedirects = false
                     httpConn.setRequestProperty("User-Agent", "Mozilla/5.0...")
 
