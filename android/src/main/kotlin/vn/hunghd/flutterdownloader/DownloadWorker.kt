@@ -139,9 +139,11 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val filename: String? = inputData.getString(ARG_FILE_NAME)
         val task = taskDao?.loadTask(id.toString())
         if (task != null && task.status == DownloadStatus.ENQUEUED) {
-            updateNotification(context, filename ?: url, DownloadStatus.CANCELED, -1, null, true)
-            taskDao?.updateTask(id.toString(), DownloadStatus.CANCELED, lastProgress)
+//            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
+//            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
+            doWork();
         }
+
     }
 
     override fun doWork(): Result {
@@ -156,7 +158,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val headers: String = inputData.getString(ARG_HEADERS)
             ?: throw IllegalArgumentException("Argument '$ARG_HEADERS' should not be null")
         var isResume: Boolean = inputData.getBoolean(ARG_IS_RESUME, false)
-        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 15000)
+        val timeout: Int = inputData.getInt(ARG_TIMEOUT, 600000)
         debug = inputData.getBoolean(ARG_DEBUG, false)
         step = inputData.getInt(ARG_STEP, 10)
         ignoreSsl = inputData.getBoolean(ARG_IGNORESSL, false)
@@ -174,9 +176,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                     ?: "GONE"
                 )
         )
-
+//|| task.status == DownloadStatus.CANCELED
         // Task has been deleted or cancelled
-        if (task == null || task.status == DownloadStatus.CANCELED) {
+        if (task == null ) {
             return Result.success()
         }
         showNotification = inputData.getBoolean(ARG_SHOW_NOTIFICATION, false)
@@ -204,17 +206,17 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         }
         return try {
             downloadFile(applicationContext, url, savedDir, filename, headers, isResume, timeout)
-            cleanUp()
+            //cleanUp()
             dbHelper = null
             taskDao = null
             Result.success()
         } catch (e: Exception) {
-            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
-            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
+//            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
+//            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
             e.printStackTrace()
             dbHelper = null
             taskDao = null
-            Result.failure()
+            Result.retry()
         }
     }
 
@@ -287,7 +289,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                 } else {
                     times = visited[url]!! + 1
                 }
-                if (times > 3) throw IOException("Stuck in redirect loop")
+                if (times > 30) throw IOException("Stuck in redirect loop")
                 resourceUrl = URL(url)
                 httpConn = if (ignoreSsl) {
                     trustAllHosts()
@@ -307,8 +309,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                     }
                 }
                 log("Open connection to $url")
-                httpConn.connectTimeout = timeout
-                httpConn.readTimeout = timeout
+                httpConn.connectTimeout = 600000
+                httpConn.readTimeout = 600000
                 httpConn.instanceFollowRedirects = false // Make the logic below easier to detect redirections
                 httpConn.setRequestProperty("User-Agent", "Mozilla/5.0...")
 
