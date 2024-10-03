@@ -1,6 +1,6 @@
 name: flutter_downloader_example
 description: Demonstrates how to use the flutter_downloader plugin.
-version: 1.0.0+1
+version:  1.11.8
 publish_to: none
 
 environment:
@@ -8,7 +8,7 @@ environment:
   flutter: ">=3.19.0"
 
 dependencies:
-  device_info_plus: ^10.1.0
+ # device_info_plus: ^10.1.0
   flutter:
     sdk: flutter
   flutter_downloader:
