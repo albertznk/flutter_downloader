@@ -154,7 +154,6 @@ class FlutterDownloaderPlugin : MethodChannel.MethodCallHandler, FlutterPlugin {
         step = args[1].toString().toInt()
         result.success(null)
     }
-
     private fun <T> MethodCall.requireArgument(key: String): T = requireNotNull(argument(key)) {
         "Required key '$key' was null"
     }
