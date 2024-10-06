@@ -141,7 +141,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         if (task != null && task.status == DownloadStatus.ENQUEUED) {
 //            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
 //            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
-            doWork();
+            Result.retry()
         }
 
     }
