@@ -139,9 +139,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val filename: String? = inputData.getString(ARG_FILE_NAME)
         val task = taskDao?.loadTask(id.toString())
         if (task != null && task.status == DownloadStatus.ENQUEUED) {
-//            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
-//            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
-            Result.retry()
+            updateNotification(context, filename ?: url, DownloadStatus.PAUSE, -1, null, true)
+            taskDao?.updateTask(id.toString(), DownloadStatus.PAUSE, lastProgress)
+            doWork();
         }
 
     }
@@ -211,6 +211,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             taskDao = null
             Result.success()
         } catch (e: Exception) {
+
 //            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
 //            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
             e.printStackTrace()
