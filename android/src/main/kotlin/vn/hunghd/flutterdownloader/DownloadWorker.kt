@@ -141,6 +141,7 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         if (task != null) {
             updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
             taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
+            doWork();
         }
 
     }
@@ -179,9 +180,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         )
 //|| task.status == DownloadStatus.CANCELED
         // Task has been deleted or cancelled
-//        if (task == null) {
-//            return Result.success()
-//        }
+        if (task == null ) {
+            return Result.success()
+        }
         showNotification = inputData.getBoolean(ARG_SHOW_NOTIFICATION, false)
         clickToOpenDownloadedFile =
                 inputData.getBoolean(ARG_OPEN_FILE_FROM_NOTIFICATION, false)
@@ -495,9 +496,10 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                 log(if (isStopped) "Download canceled" else "Server replied HTTP code: $responseCode")
             }
         } catch (e: IOException) {
-            Result.success()
-            doWork()
-            e.printStackTrace()
+            taskDao!!.updateTask(id.toString(), DownloadStatus.PAUSED, lastProgress)
+                Thread.sleep(2000) // Add a delay before retrying (5 seconds)
+                downloadFile(context, fileURL, savedDir, filename, headers, true, timeout) // Set `isResume` to true to resume
+                e.printStackTrace()
         } finally {
             if (outputStream != null) {
                 outputStream.flush()
