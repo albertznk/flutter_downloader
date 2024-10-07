@@ -138,13 +138,15 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val url: String? = inputData.getString(ARG_URL)
         val filename: String? = inputData.getString(ARG_FILE_NAME)
         val task = taskDao?.loadTask(id.toString())
-        if (task != null && task.status == DownloadStatus.ENQUEUED) {
-            updateNotification(context, filename ?: url, DownloadStatus.PAUSE, -1, null, true)
-            taskDao?.updateTask(id.toString(), DownloadStatus.PAUSE, lastProgress)
+        if (task != null) {
+//            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
+//            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
             doWork();
         }
 
     }
+
+
 
     override fun doWork(): Result {
         dbHelper = TaskDbHelper.getInstance(applicationContext)
@@ -211,12 +213,12 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             taskDao = null
             Result.success()
         } catch (e: Exception) {
-
 //            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
 //            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
             e.printStackTrace()
             dbHelper = null
             taskDao = null
+            doWork()
             Result.retry()
         }
     }
@@ -237,7 +239,6 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             }
         }
     }
-
 
     private fun setupPartialDownloadedDataHeader(
             conn: HttpURLConnection,
@@ -465,35 +466,38 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                         }
                     }
                 }
+                log(message = status.toString() +"bar")
                 if(isStopped){
-                    doWork()
-                    Result.success()
+                    if(status == DownloadStatus.FAILED || status == DownloadStatus.CANCELED){
+                        doWork()
+                        Result.success()
+                    }else{
+                        taskDao!!.updateTask(id.toString(), status, progress)
+                        updateNotification(context, actualFilename, status, progress, pendingIntent, true)
+                    }
                 }else{
                     taskDao!!.updateTask(id.toString(), status, progress)
                     updateNotification(context, actualFilename, status, progress, pendingIntent, true)
-                    log(if (isStopped) "Download canceled" else "File downloaded")
                 }
+                log(if (isStopped) "Download canceled" else "File downloaded")
             } else {
                 val loadedTask = taskDao!!.loadTask(id.toString())
                 val status =
                         if (isStopped) if (loadedTask!!.resumable) DownloadStatus.PAUSED else DownloadStatus.CANCELED else DownloadStatus.FAILED
-                if(isStopped){
+                if(status == DownloadStatus.FAILED || status == DownloadStatus.CANCELED){
                     doWork()
                     Result.success()
                 }else{
                     taskDao!!.updateTask(id.toString(), status, lastProgress)
                     updateNotification(context, actualFilename ?: fileURL, status, -1, null, true)
-                    log(if (isStopped) "Download canceled" else "Server replied HTTP code: $responseCode")
+                    log(message = status.toString()+ "#bla")
                 }
+                log(if (isStopped) "Download canceled" else "Server replied HTTP code: $responseCode")
             }
         } catch (e: IOException) {
-//            taskDao!!.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
-//            updateNotification(context, actualFilename ?: fileURL, DownloadStatus.RUNNING, -1, null, true)
-//            e.printStackTrace()
             doWork()
-            Result.success()
-            log("result retry after ")
-
+            Result.retry()
+            e.printStackTrace()
         } finally {
             if (outputStream != null) {
                 outputStream.flush()
