@@ -139,9 +139,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         val filename: String? = inputData.getString(ARG_FILE_NAME)
         val task = taskDao?.loadTask(id.toString())
         if (task != null) {
-//            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
-//            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
-            doWork();
+            updateNotification(context, filename ?: url, DownloadStatus.RUNNING, -1, null, true)
+            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
         }
 
     }
@@ -180,9 +179,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
         )
 //|| task.status == DownloadStatus.CANCELED
         // Task has been deleted or cancelled
-        if (task == null ) {
-            return Result.success()
-        }
+//        if (task == null) {
+//            return Result.success()
+//        }
         showNotification = inputData.getBoolean(ARG_SHOW_NOTIFICATION, false)
         clickToOpenDownloadedFile =
                 inputData.getBoolean(ARG_OPEN_FILE_FROM_NOTIFICATION, false)
