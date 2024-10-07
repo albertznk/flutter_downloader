@@ -218,8 +218,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             e.printStackTrace()
             dbHelper = null
             taskDao = null
+            downloadFile(applicationContext, url, savedDir, filename, headers, isResume, timeout)
             doWork()
-            Result.retry()
+
         }
     }
 
@@ -495,8 +496,8 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
                 log(if (isStopped) "Download canceled" else "Server replied HTTP code: $responseCode")
             }
         } catch (e: IOException) {
+            Result.success()
             doWork()
-            Result.retry()
             e.printStackTrace()
         } finally {
             if (outputStream != null) {
