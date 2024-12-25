@@ -214,9 +214,9 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
 //            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
 //            taskDao?.updateTask(id.toString(), DownloadStatus.FAILED, lastProgress)
             downloadFile(applicationContext, url, savedDir, filename, headers, isResume, timeout)
-            e.printStackTrace()
-            dbHelper = null
-            taskDao = null
+//            e.printStackTrace()
+//            dbHelper = null
+//            taskDao = null
             Result.retry()
         }
     }
