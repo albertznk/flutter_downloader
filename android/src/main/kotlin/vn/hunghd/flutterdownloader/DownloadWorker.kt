@@ -212,11 +212,15 @@ class DownloadWorker(context: Context, params: WorkerParameters) :
             Result.success()
         } catch (e: Exception) {
 //            updateNotification(applicationContext, filename ?: url, DownloadStatus.FAILED, -1, null, true)
-            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, lastProgress)
-            e.printStackTrace()
+
+            //  downloadFile(applicationContext, url, savedDir, filename, headers, isResume, timeout)
+            taskDao?.updateTask(id.toString(), DownloadStatus.RUNNING, task.progress)
+//            e.printStackTrace()
 //            dbHelper = null
 //            taskDao = null
+
             Result.retry()
+
         }
     }
 
